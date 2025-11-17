@@ -61,7 +61,7 @@ struct EnvironmentParameters
 
     // Disturbances
     double dist_mean = 0.0;
-    double dist_stddev = 0.5;
+    double dist_stddev = 0.0;
 };
 
 }; // namespace quadcopter

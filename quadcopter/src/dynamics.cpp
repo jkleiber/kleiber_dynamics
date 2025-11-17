@@ -10,6 +10,13 @@ void Dynamics::Init(Eigen::VectorXd x0)
     // Motors initial conditions (assumed to be 0)
     this->x_motors = Eigen::VectorXd::Zero(4);
     this->u_prev = Eigen::VectorXd::Zero(4);
+
+    // Set vehicle and environmental params to the default.
+    VehicleParameters vehicle{};
+    SetVehicleParams(vehicle);
+
+    EnvironmentParameters env{};
+    SetEnvironmentParams(env);
 }
 
 void Dynamics::GetMotorForces(Eigen::VectorXd u)
@@ -43,8 +50,11 @@ void Dynamics::GetMotorForces(Eigen::VectorXd u)
                                                     env_params_.dist_stddev);
         double dist = motor_dist(motor_gen);
 
-        // Disturb
-        new_x_motors(i) += dist;
+        // Disturb motor output if the motors have an applied force.
+        if (u(i) > 0.0)
+        {
+            new_x_motors(i) += dist;
+        }
     }
 
     this->x_motors = new_x_motors;
@@ -143,10 +153,10 @@ void Dynamics::UpdateDynamics(Eigen::VectorXd u0)
     this->x = this->x + x_dot * dt_;
 
     // Don't allow the drone to fall below the ground
-    // if (x(8) < 0)
-    // {
-    //     x(8) = 0;
-    // }
+    if (x(8) < 0)
+    {
+        x(8) = 0;
+    }
 }
 
 Eigen::VectorXd Dynamics::GetState() { return this->x; }
